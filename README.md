@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MarketIQ — Marketing Intelligence Dashboard
 
 Dashboard Streamlit branché sur un **dataset client unique** (format
@@ -139,3 +140,6 @@ des anomalies `Income` : le notebook exécute `df.loc[df["Income"] >
 200000] = np.nan`, ce qui met TOUTE la ligne à NaN (probable bug), pas
 seulement `Income`. Le dashboard corrige uniquement la colonne `Income`,
 pour ne pas perdre les autres informations de ces clients.
+=======
+# marketing_smd
+>>>>>>> 929edbb4a70a95638f0b0505f33a6d9145a8a4d5
