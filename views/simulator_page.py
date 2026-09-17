@@ -18,44 +18,44 @@ from utils.ml import (
 
 FEATURE_LABELS = {
     # Profil client
-    "Age": "Âge du client",
+    "Age": "Âge",
     "Income": "Revenu annuel",
 
     "Gender_Encoded": "Genre",
     "Is_Online_Shopper": "Achète principalement en ligne",
 
     # Achats
-    "Total_Spent": "Montant total dépensé",
-    "Frequency": "Nombre d'achats",
-    "Avg_Basket": "Panier moyen",
-    "Total_Quantity": "Quantité totale achetée",
+    "Total_Spent": "Dépenses totales",
+    "Frequency": "Nombre total d'achats",
+    "Avg_Basket": "Montant moyen par achat",
+    "Total_Quantity": "Articles achetés",
 
-    "Tenure_Days": "Ancienneté du client",
-    "Customer_Span_Days": "Durée de la relation client",
+    "Tenure_Days": "Ancienneté",
+    "Customer_Span_Days": "Durée de la relation",
 
-    "Purchase_Rate": "Fréquence d'achat",
+    "Purchase_Rate": "Rythme d'achat",
     "Avg_Item_Price": "Prix moyen des articles",
 
-    "Unique_Products": "Nombre de produits différents",
-    "Product Count": "Nombre de produits différents",
+    "Unique_Products": "Produits différents",
+    "Product Count": "Produits différents",
 
-    "Monetary_Velocity": "Dépense moyenne par période",
-    "Basket_Depth": "Nombre moyen d'articles par achat",
+    "Monetary_Velocity": "Dépense moyenne",
+    "Basket_Depth": "Articles par achat",
 
     # Comportement digital
     "NumWebVisitsMonth": "Visites du site par mois",
-    "NumWebPurchases": "Achats effectués en ligne",
-    "NumCatalogPurchases": "Achats via catalogue",
+    "NumWebPurchases": "Achats en ligne",
+    "NumCatalogPurchases": "Achats par catalogue",
     "NumStorePurchases": "Achats en magasin",
 
     # Parts / proportions
-    "Catalog Share": "Part des achats via catalogue",
-    "Deal Share": "Part des achats avec promotion",
+    "Catalog Share": "Part des achats par catalogue",
+    "Deal Share": "Part des achats promotionnels",
     "Web Share": "Part des achats en ligne",
     "Store Share": "Part des achats en magasin",
 
     # Promotions
-    "NumDealsPurchases": "Achats avec promotion",
+    "NumDealsPurchases": "Achats promotionnels",
 }
 
 
@@ -189,12 +189,9 @@ def get_feature_config(feature):
     }
 
     if feature in integer_features:
-
-        config = integer_features[feature]
-
         return {
             "type": "int",
-            **config,
+            **integer_features[feature],
         }
 
     # --------------------------------------------------------
@@ -281,12 +278,9 @@ def get_feature_config(feature):
     }
 
     if feature in decimal_features:
-
-        config = decimal_features[feature]
-
         return {
             "type": "float",
-            **config,
+            **decimal_features[feature],
         }
 
     # --------------------------------------------------------
@@ -294,7 +288,6 @@ def get_feature_config(feature):
     # --------------------------------------------------------
 
     if feature == "Gender_Encoded":
-
         return {
             "type": "select",
             "options": {
@@ -305,7 +298,6 @@ def get_feature_config(feature):
         }
 
     if feature == "Is_Online_Shopper":
-
         return {
             "type": "select",
             "options": {
@@ -353,7 +345,6 @@ def render_feature_input(feature, key_suffix=""):
     # --------------------------------------------------------
 
     if config["type"] == "int":
-
         return st.number_input(
             label,
             min_value=config["min"],
@@ -559,8 +550,8 @@ def validate_inputs(input_values):
 def render(customers):
 
     page_header(
-        "Estimez le risque qu'un client quitte l'entreprise.",
-        "Analyse basée sur le profil et le comportement"
+        "Estimez le risque de départ d'un client.",
+        "Analyse basée sur le profil et le comportement d'achat",
     )
 
     # ========================================================
@@ -577,7 +568,7 @@ def render(customers):
     if churn_artifact is None:
 
         not_available_box(
-            "Modèle de churn non chargé",
+            "Modèle de risque non chargé",
             "Le simulateur nécessite churn_model.json et "
             "churn_metadata.pkl dans le dossier models/.",
         )
@@ -585,23 +576,6 @@ def render(customers):
         return
 
     churn_features = churn_artifact["features"]
-
-    # ========================================================
-    # INTRODUCTION
-    # ========================================================
-
-    # st.markdown(
-    #     """
-    #     <div class="note" style="margin-bottom:18px;">
-    #         <strong>Comment utiliser le simulateur ?</strong><br>
-    #         Renseignez les informations concernant le client.
-    #         Les champs sont présentés avec des intitulés simples
-    #         afin de faciliter leur utilisation.
-    #         Les limites autorisées sont indiquées automatiquement.
-    #     </div>
-    #     """,
-    #     unsafe_allow_html=True,
-    # )
 
     # ========================================================
     # FORMULAIRE
@@ -626,17 +600,11 @@ def render(customers):
 
         with col_left:
 
-            # st.markdown(
-            #     "#### Profil du client"
-            # )
-
             for feature in left_features:
 
-                input_values[feature] = (
-                    render_feature_input(
-                        feature,
-                        "left",
-                    )
+                input_values[feature] = render_feature_input(
+                    feature,
+                    "left",
                 )
 
         # ====================================================
@@ -645,23 +613,17 @@ def render(customers):
 
         with col_right:
 
-            # st.markdown(
-            #     "#### Comportement d'achat"
-            # )
-
             for feature in right_features:
 
-                input_values[feature] = (
-                    render_feature_input(
-                        feature,
-                        "right",
-                    )
+                input_values[feature] = render_feature_input(
+                    feature,
+                    "right",
                 )
 
         st.markdown("")
 
         submitted = st.form_submit_button(
-            "Prédire le risque de churn",
+            "Analyser le risque",
             type="primary",
             use_container_width=True,
         )
@@ -672,9 +634,7 @@ def render(customers):
 
     if submitted:
 
-        errors = validate_inputs(
-            input_values
-        )
+        errors = validate_inputs(input_values)
 
         if errors:
 
@@ -683,7 +643,6 @@ def render(customers):
             )
 
             for error in errors:
-
                 st.markdown(
                     f"- {error}"
                 )
@@ -707,7 +666,7 @@ def render(customers):
         )
 
         # ====================================================
-        # PRÉDICTION CHURN
+        # PRÉDICTION DU RISQUE
         # ====================================================
 
         try:
@@ -731,7 +690,7 @@ def render(customers):
         except Exception as e:
 
             st.error(
-                "Une erreur est survenue pendant la prédiction."
+                "Une erreur est survenue pendant l'analyse."
             )
 
             st.caption(
@@ -750,10 +709,9 @@ def render(customers):
             risk_color = "#5B7F5E"
 
             reco = (
-                "Le client présente un risque relativement faible "
-                "de départ. Maintenir la relation grâce à des "
-                "actions de fidélisation et des recommandations "
-                "de produits."
+                "Le client présente un faible risque de départ. "
+                "Maintenir la relation grâce à des actions de "
+                "fidélisation et des recommandations de produits adaptées."
             )
 
         elif proba < 65:
@@ -762,10 +720,9 @@ def render(customers):
             risk_color = "#C6862E"
 
             reco = (
-                "Le client présente un risque intermédiaire. "
+                "Le client présente un risque intermédiaire de départ. "
                 "Une relance personnalisée et des recommandations "
-                "de produits complémentaires peuvent renforcer "
-                "son engagement."
+                "de produits complémentaires peuvent renforcer son engagement."
             )
 
         else:
@@ -774,20 +731,19 @@ def render(customers):
             risk_color = "#A8452F"
 
             reco = (
-                "Le client présente un risque important de départ. "
+                "Le client présente un risque élevé de départ. "
                 "Une campagne de réactivation personnalisée avec "
-                "une offre adaptée à son comportement d'achat "
-                "est recommandée."
+                "une offre adaptée à son comportement d'achat est recommandée."
             )
 
         # ====================================================
-        # RESULTAT EN BAS
+        # RESULTAT
         # ====================================================
 
         st.markdown("---")
 
         st.markdown(
-            "### Résultat de la prédiction"
+            "### Résultat de l'analyse"
         )
 
         result_col1, result_col2 = st.columns(
@@ -809,27 +765,10 @@ def render(customers):
             )
 
         # ----------------------------------------------------
-        # RECOMMANDATION
+        # VALEUR CLIENT
         # ----------------------------------------------------
 
         with result_col2:
-
-            # st.markdown(
-            #     "#### Recommandation"
-            # )
-
-            # st.markdown(
-            #     f"""
-            #     <div class="note">
-            #         {reco}
-            #     </div>
-            #     """,
-            #     unsafe_allow_html=True,
-            # )
-
-            # ------------------------------------------------
-            # CLV
-            # ------------------------------------------------
 
             if clv_artifact is not None:
 
@@ -842,8 +781,7 @@ def render(customers):
                                     feature,
                                     0.0,
                                 )
-                                for feature
-                                in clv_artifact["features"]
+                                for feature in clv_artifact["features"]
                             }
                         ]
                     )
@@ -854,7 +792,7 @@ def render(customers):
                     )
 
                     st.metric(
-                        "Valeur client estimée (CLV)",
+                        "Valeur client estimée",
                         f"{clv_pred:,.0f}",
                     )
 
@@ -880,7 +818,7 @@ def render(customers):
             f"""
             <div class="note">
                 <strong>Résultat :</strong>
-                le modèle estime une probabilité de churn de
+                le modèle estime une probabilité de départ de
                 <strong>{proba:.1f} %</strong>.
                 Le niveau de risque est donc considéré comme
                 <strong>{risk_label.lower()}</strong>.
