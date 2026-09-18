@@ -132,7 +132,6 @@ def render(customers):
         st.write("")
 
         # ------------------------------------------------ DÉMOGRAPHIE --
-        st.write("VERSION : 18 SEPTEMBRE 2026 - TEST")
 
         st.markdown("###### Informations démographiques")
 
